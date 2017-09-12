@@ -11,14 +11,14 @@ import os
 import sys
 import unittest
 if __name__ == "__main__":
-    sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from rpihome_v3.helpers.ref_num import RefNum
-from rpihome_v3.database_service.configure import ConfigureService
-from rpihome_v3.database_service.msg_processing import create_heartbeat_msg
-from rpihome_v3.database_service.msg_processing import process_heartbeat_msg
-from rpihome_v3.database_service.msg_processing import process_log_status_update_msg
-from rpihome_v3.database_service.msg_processing import process_return_command_msg
-from rpihome_v3.database_service.msg_processing import process_update_command_msg
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from bob_db_service.tools.ref_num import RefNum
+from bob_db_service.configure import ConfigureService
+from bob_db_service.msg_processing import create_heartbeat_msg
+from bob_db_service.msg_processing import process_heartbeat_msg
+from bob_db_service.msg_processing import process_log_status_update_msg
+from bob_db_service.msg_processing import process_return_command_msg
+from bob_db_service.msg_processing import process_update_command_msg
 
 
 # Define test class ***********************************************************
@@ -38,9 +38,7 @@ class Test_message_processing_db(unittest.TestCase):
         self.temp_dt = datetime.datetime
         self.destinations = []
         # Create items that will come from config file
-        self.parent_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        self.config_file = os.path.join(self.parent_path, 'config.ini')
-        self.config = ConfigureService(self.config_file)
+        self.config = ConfigureService('config.ini') 
         self.service_addresses = self.config.get_servers()
         self.message_types = self.config.get_message_types()
         self.credentials = self.config.get_credentials()
