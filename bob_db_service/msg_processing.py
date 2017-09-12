@@ -6,21 +6,21 @@
 import asyncio
 import copy
 import datetime
+import os
+import sys
 if __name__ == "__main__":
-    import os
-    import sys
-    sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from rpihome_v3.messages.heartbeat import HeartbeatMessage
-from rpihome_v3.messages.heartbeat_ack import HeartbeatMessageACK
-from rpihome_v3.messages.log_status_update import LogStatusUpdateMessage
-from rpihome_v3.messages.log_status_update_ack import LogStatusUpdateMessageACK
-from rpihome_v3.messages.return_command import ReturnCommandMessage
-from rpihome_v3.messages.return_command_ack import ReturnCommandMessageACK
-from rpihome_v3.messages.update_command import UpdateCommandMessage
-from rpihome_v3.messages.update_command_ack import UpdateCommandMessageACK
-from rpihome_v3.database_service.persistance import insert_record
-from rpihome_v3.database_service.persistance import query_command
-from rpihome_v3.database_service.persistance import update_command
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from bob_db_service.messages.heartbeat import HeartbeatMessage
+from bob_db_service.messages.heartbeat_ack import HeartbeatMessageACK
+from bob_db_service.messages.log_status_update import LogStatusUpdateMessage
+from bob_db_service.messages.log_status_update_ack import LogStatusUpdateMessageACK
+from bob_db_service.messages.return_command import ReturnCommandMessage
+from bob_db_service.messages.return_command_ack import ReturnCommandMessageACK
+from bob_db_service.messages.update_command import UpdateCommandMessage
+from bob_db_service.messages.update_command_ack import UpdateCommandMessageACK
+from bob_db_service.persistance import insert_record
+from bob_db_service.persistance import query_command
+from bob_db_service.persistance import update_command
 
 
 # Authorship Info *************************************************************

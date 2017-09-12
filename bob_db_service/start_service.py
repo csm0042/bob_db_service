@@ -4,14 +4,15 @@
 # Import Required Libraries (Standard, Third Party, Local) ********************
 import asyncio
 from contextlib import suppress
+import os
 import sys
 if __name__ == "__main__":
-    import os
-    sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from rpihome_v3.database_service.configure import ConfigureService
-from rpihome_v3.helpers.ref_num import RefNum
-from rpihome_v3.helpers.message_handlers import MessageHandler
-from rpihome_v3.database_service.service_main import MainTask
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from bob_db_service.configure import ConfigureService
+from bob_db_service.service_main import MainTask
+from bob_db_service.tools.ref_num import RefNum
+from bob_db_service.tools.message_handlers import MessageHandler
+
 
 
 # Authorship Info *************************************************************
@@ -26,9 +27,10 @@ __status__ = "Development"
 
 
 # Application wide objects ****************************************************
-PARENT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-CONFIG_FILE = os.path.join(PARENT_PATH, 'config.ini')
-SERVICE_CONFIG = ConfigureService(CONFIG_FILE)
+if __name__ == "__main__":
+    SERVICE_CONFIG = ConfigureService('config.ini')
+else:
+    SERVICE_CONFIG = ConfigureService('bob_db_service/config.ini')
 LOG = SERVICE_CONFIG.get_logger()
 SERVICE_ADDRESSES = SERVICE_CONFIG.get_servers()
 MESSAGE_TYPES = SERVICE_CONFIG.get_message_types()
