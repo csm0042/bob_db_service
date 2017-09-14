@@ -20,7 +20,8 @@ from bob_db_service.messages.update_command import UpdateCommandMessage
 from bob_db_service.messages.update_command_ack import UpdateCommandMessageACK
 from bob_db_service.persistance import insert_record
 from bob_db_service.persistance import query_command
-from bob_db_service.persistance import update_command
+from bob_db_service.persistance import update_processed
+from bob_db_service.persistance import update_executed
 
 
 # Authorship Info *************************************************************
@@ -171,6 +172,15 @@ def process_return_command_msg(log, ref_num, database, msg, message_types):
                     dev_timestamp=copy.copy(pending_cmd_seg[3]),
                     dev_processed=copy.copy(pending_cmd_seg[4]))
 
+                # Execute update Query
+                log.debug('Querying database to mark command as processed: %s',
+                          message.complete)
+                update_processed(
+                    log,
+                    database,
+                    pending_cmd_seg[0],
+                    str(datetime.datetime.now())[:19])
+
                 # Load message into output list
                 log.debug('Loading completed msg: %s', out_msg.complete)
                 out_msg_list.append(copy.copy(out_msg.complete))
@@ -202,7 +212,7 @@ def process_update_command_msg(log, ref_num, database, msg, message_types):
     # Execute update Query
     log.debug('Querying database to mark command as processed: %s',
               message.complete)
-    update_command(
+    update_executed(
         log,
         database,
         message.dev_id,

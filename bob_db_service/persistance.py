@@ -109,7 +109,7 @@ def query_command(log, database):
 
 
 # Update processed status of commands in device_cmd table function ************
-def update_command(log, database, id_cmd, processed_cmd):
+def update_processed(log, database, id_cmd, processed_cmd):
     """ Updates processed field for an individual record in the device
     cmd table """
     # Configure log
@@ -142,3 +142,39 @@ def update_command(log, database, id_cmd, processed_cmd):
         log.debug('Changed committed to database')
         cursor.close()
         log.debug('Closed connection to database cursor')
+
+
+# Update processed status of commands in device_cmd table function ************
+def update_executed(log, database, id_cmd, processed_cmd):
+    """ Updates processed field for an individual record in the device
+    cmd table """
+    # Configure log
+    log = log or logging.getLogger(__name__)
+    log.debug('update_command function has been called')
+
+    # Attempt database record insert
+    try:
+        # Check first if valid database connection was made
+        if database is not None:
+            log.debug('Connection to database is ok')
+
+            # Grab cursor and prepare query
+            cursor = database.cursor()
+            log.debug('Connection to cursor successful')
+            query = ("UPDATE device_cmd "
+                     "SET executed = %s "
+                     "WHERE id_device_cmd = %s")
+            data = (processed_cmd[:19], id_cmd)
+            full_query = query % data
+            log.debug('Ready to execute query: %s', full_query)
+            cursor.execute(query, data)
+            log.debug('Query execution successful')
+        else:
+            log.warning('No connection to database')
+    except Exception:
+        log.warning('Attempt to query database failed')
+    finally:
+        database.commit()
+        log.debug('Changed committed to database')
+        cursor.close()
+        log.debug('Closed connection to database cursor')        
