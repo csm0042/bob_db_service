@@ -52,7 +52,7 @@ def create_heartbeat_msg(log, ref_num, destinations, source_addr, source_port, m
         )
         # Load message into output list
         log.debug('Loading completed msg: %s', out_msg.complete)
-        out_msg_list.append(out_msg.complete)
+        out_msg_list.append(copy.copy(out_msg.complete))
 
     # Return response message
     return out_msg_list
@@ -80,7 +80,7 @@ def process_heartbeat_msg(log, ref_num, msg, message_types):
 
     # Load message into output list
     log.debug('Loading completed msg: [%s]', out_msg.complete)
-    out_msg_list.append(out_msg.complete)
+    out_msg_list.append(copy.copy(out_msg.complete))
 
     # Return response message
     return out_msg_list
@@ -173,7 +173,7 @@ def process_return_command_msg(log, ref_num, database, msg, message_types):
 
                 # Load message into output list
                 log.debug('Loading completed msg: %s', out_msg.complete)
-                out_msg_list.append(out_msg.complete)
+                out_msg_list.append(copy.copy(out_msg.complete))
             else:
                 log.warning('Invalid command received from DB: %s', pending_cmd)
     else:
@@ -222,7 +222,7 @@ def process_update_command_msg(log, ref_num, database, msg, message_types):
 
     # Load message into output list
     log.debug('Loading completed msg: [%s]', out_msg.complete)
-    out_msg_list.append(out_msg.complete)
+    out_msg_list.append(copy.copy(out_msg.complete))
 
     # Return response message
     return out_msg_list
