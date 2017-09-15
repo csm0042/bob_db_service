@@ -8,6 +8,7 @@ import os
 import sys
 if __name__ == "__main__":
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from bob_db_service.tools.log_support import setup_function_logger
 from bob_db_service.tools.ipv4_help import check_ipv4
 from bob_db_service.tools.field_checkers import in_int_range
 from bob_db_service.tools.field_checkers import is_valid_datetime
@@ -27,9 +28,11 @@ __status__ = "Development"
 # Message Class Definition ****************************************************
 class UpdateCommandMessage(object):
     """ Update Command message class and methods """
-    def __init__(self, log=None, **kwargs):
-        # Configure logger
-        self.log = log or logging.getLogger(__name__)
+    def __init__(self, log_path, **kwargs):
+        # Configure loggers
+        self.log_path = log_path
+        self.log = setup_function_logger(self.log_path, 'Class_UpdateCommandMessage')
+
         self._ref = str()
         self._dest_addr = str()
         self._dest_port = str()
@@ -85,7 +88,7 @@ class UpdateCommandMessage(object):
 
     @ref.setter
     def ref(self, value):
-        if in_int_range(self.log, value, 100, 999) is True:
+        if in_int_range(self.log_path, value, 100, 999) is True:
             self._ref = str(value)
             self.log.debug('Ref number updated to: %s', self._ref)
         else:
@@ -119,7 +122,7 @@ class UpdateCommandMessage(object):
 
     @dest_port.setter
     def dest_port(self, value):
-        if in_int_range(self.log, value, 10000, 60000) is True:
+        if in_int_range(self.log_path, value, 10000, 60000) is True:
             self._dest_port = str(value)
             self.log.debug('Destination port updated to: %s', self._dest_port)
         else:
@@ -152,7 +155,7 @@ class UpdateCommandMessage(object):
 
     @source_port.setter
     def source_port(self, value):
-        if in_int_range(self.log, value, 10000, 60000) is True:
+        if in_int_range(self.log_path, value, 10000, 60000) is True:
             self._source_port = str(value)
             self.log.debug('Source port updated to: %s', self._source_port)
         else:
@@ -168,7 +171,7 @@ class UpdateCommandMessage(object):
 
     @msg_type.setter
     def msg_type(self, value):
-        if in_int_range(self.log, value, 100, 999) is True:
+        if in_int_range(self.log_path, value, 100, 999) is True:
             self._msg_type = str(value)
             self.log.debug('Message type updated to: %s', self._msg_type)
         else:
@@ -184,7 +187,7 @@ class UpdateCommandMessage(object):
 
     @dev_id.setter
     def dev_id(self, value):
-        if in_int_range(self.log, value, 1, 99999999) is True:
+        if in_int_range(self.log_path, value, 1, 99999999) is True:
             self._dev_id = str(value)
             self.log.debug('Device ID updated to: %s', self._dev_id)
         else:
@@ -201,7 +204,7 @@ class UpdateCommandMessage(object):
     @dev_processed.setter
     def dev_processed(self, value):
         self._dev_processed = is_valid_datetime(
-            self.log,
+            self.log_path,
             value,
             self._dev_processed)
         self.log.debug('Device processed updated to: %s', self._dev_processed)

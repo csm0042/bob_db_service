@@ -10,6 +10,7 @@ application.  The following functions are supported here:
 import copy
 import datetime
 import logging
+from bob_db_service.tools.log_support import setup_function_logger
 
 
 # Authorship Info *************************************************************
@@ -24,10 +25,10 @@ __status__ = "Development"
 
 
 # Insert Record into log table in database function ***************************
-def insert_record(log, database, name, status, last_seen):
+def insert_record(log_path, database, name, status, last_seen):
     """ Inserts a new record into the device log table """
-    # Configure logger
-    log = log or logging.getLogger(__name__)
+    # Configure logging for this function
+    log = setup_function_logger(log_path, 'Function_insert_record')
     log.debug('insert_record function has been called')
 
     # Attempt database record insert
@@ -57,10 +58,10 @@ def insert_record(log, database, name, status, last_seen):
 
 
 # Return pending commands from device_cmd table function **********************
-def query_command(log, database):
+def query_command(log_path, database):
     """ Returns a list of un-processed commands from the device_cmd table """
-    # Configure log
-    log = log or logging.getLogger(__name__)
+    # Configure logging for this function
+    log = setup_function_logger(log_path, 'Function_query_command')
     log.debug('query_command function has been called')
 
     # initialize result list
@@ -109,11 +110,11 @@ def query_command(log, database):
 
 
 # Update processed status of commands in device_cmd table function ************
-def update_processed(log, database, id_cmd, processed_cmd):
+def update_processed(log_path, database, id_cmd, processed_cmd):
     """ Updates processed field for an individual record in the device
     cmd table """
-    # Configure log
-    log = log or logging.getLogger(__name__)
+    # Configure logging for this function
+    log = setup_function_logger(log_path, 'Function_update_processed')
     log.debug('update_command function has been called')
 
     # Attempt database record insert
@@ -145,11 +146,11 @@ def update_processed(log, database, id_cmd, processed_cmd):
 
 
 # Update processed status of commands in device_cmd table function ************
-def update_executed(log, database, id_cmd, processed_cmd):
+def update_executed(log_path, database, id_cmd, processed_cmd):
     """ Updates processed field for an individual record in the device
     cmd table """
-    # Configure log
-    log = log or logging.getLogger(__name__)
+    # Configure logging for this function
+    log = setup_function_logger(log_path, 'Function_update_executed')
     log.debug('update_command function has been called')
 
     # Attempt database record insert

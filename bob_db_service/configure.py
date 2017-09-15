@@ -50,6 +50,12 @@ class ConfigureService(object):
             self.config_file['LOG FILES']['database_info_log_file'])
         # Return configured objects to main program
         return self.log
+    
+    
+    def get_logger_path(self):
+        # Set up application logging storage paths
+        self.config_file.read(self.filename)
+        return self.config_file['LOG FILES']['log_file_path']    
 
 
     def get_servers(self):

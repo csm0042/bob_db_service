@@ -6,6 +6,7 @@
 import logging
 import re
 import sys
+from bob_db_service.tools.log_support import setup_function_logger
 
 
 # Authorship Info *************************************************************

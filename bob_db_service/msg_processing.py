@@ -10,6 +10,7 @@ import os
 import sys
 if __name__ == "__main__":
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from bob_db_service.tools.log_support import setup_function_logger
 from bob_db_service.messages.heartbeat import HeartbeatMessage
 from bob_db_service.messages.heartbeat_ack import HeartbeatMessageACK
 from bob_db_service.messages.log_status_update import LogStatusUpdateMessage
@@ -35,15 +36,18 @@ __email__ = "csmaue@gmail.com"
 __status__ = "Development"
 
 
-def create_heartbeat_msg(log, ref_num, destinations, source_addr, source_port, message_types):
+def create_heartbeat_msg(log_path, ref_num, destinations, source_addr, source_port, message_types):
     """ function to create one or more heartbeat messages """
+    # Configure logging for this function
+    log = setup_function_logger(log_path, 'Function_create_heartbeat_msg')
+
     # Initialize result list
     out_msg_list = []
 
     # Generate a heartbeat message for each destination given
     for entry in destinations:
         out_msg = HeartbeatMessage(
-            log=log,
+            log_path,
             ref=ref_num.new(),
             dest_addr=entry[0],
             dest_port=entry[1],
@@ -59,19 +63,22 @@ def create_heartbeat_msg(log, ref_num, destinations, source_addr, source_port, m
     return out_msg_list
 
 
-def process_heartbeat_msg(log, ref_num, msg, message_types):
+def process_heartbeat_msg(log_path, ref_num, msg, message_types):
     """ function to ack wake-up requests to wemo service """
+    # Configure logging for this function
+    log = setup_function_logger(log_path, 'Function_process_heartbeat_msg')
+
     # Initialize result list
     out_msg_list = []
 
     # Map message into wemo wake-up message class
-    message = HeartbeatMessage(log=log)
+    message = HeartbeatMessage(log_path)
     message.complete = msg
 
     # Send response indicating query was executed
     log.debug('Building response message header')
     out_msg = HeartbeatMessageACK(
-        log=log,
+        log_path,
         ref=ref_num.new(),
         dest_addr=message.source_addr,
         dest_port=message.source_port,
@@ -89,22 +96,25 @@ def process_heartbeat_msg(log, ref_num, msg, message_types):
 
 # Process log status update message *******************************************
 @asyncio.coroutine
-def process_log_status_update_msg(log, ref_num, database, msg, message_types):
+def process_log_status_update_msg(log_path, ref_num, database, msg, message_types):
     """ When a LSU message is received, log the contents of the message to
         the database
     """
+    # Configure logging for this function
+    log = setup_function_logger(log_path, 'Function_process_log_status_update_msg')
+
     # Initialize result list
     out_msg_list = []
 
     # Map message header & payload to usable tags
-    message = LogStatusUpdateMessage(log=log)
+    message = LogStatusUpdateMessage(log_path)
     message.complete = msg
 
     # Execute Insert Query
     log.debug('Logging status change message to database: %s',
               message.complete)
     insert_record(
-        log,
+        log_path,
         database,
         message.dev_name,
         message.dev_status,
@@ -113,7 +123,7 @@ def process_log_status_update_msg(log, ref_num, database, msg, message_types):
     # Send response indicating query was executed
     log.debug('Generating LSU ACK message')
     out_msg = LogStatusUpdateMessageACK(
-        log=log,
+        log_path,
         ref=ref_num.new(),
         dest_addr=message.source_addr,
         dest_port=message.source_port,
@@ -132,22 +142,25 @@ def process_log_status_update_msg(log, ref_num, database, msg, message_types):
 
 # Process return command message **********************************************
 @asyncio.coroutine
-def process_return_command_msg(log, ref_num, database, msg, message_types):
+def process_return_command_msg(log_path, ref_num, database, msg, message_types):
     """ When a RC message is received, check the database for any pending
         commands
     """
+    # Configure logging for this function
+    log = setup_function_logger(log_path, 'Function_process_return_command_msg')
+
     # Initialize result list
     out_msg_list = []
     result_list = []
 
     # Map message header & payload to usable tags
-    message = ReturnCommandMessage(log=log)
+    message = ReturnCommandMessage(log_path)
     message.complete = msg
 
     # Execute select Query
     log.debug('Querying database for pending device commands')
     result_list = query_command(
-        log,
+        log_path,
         database)
 
     # Send response message for each record returned by query
@@ -159,7 +172,7 @@ def process_return_command_msg(log, ref_num, database, msg, message_types):
             # Create message RC ACK message to automation service
             if len(pending_cmd_seg) >= 5:
                 out_msg = ReturnCommandMessageACK(
-                    log=log,
+                    log_path,
                     ref=ref_num.new(),
                     dest_addr=message.source_addr,
                     dest_port=message.source_port,
@@ -176,7 +189,7 @@ def process_return_command_msg(log, ref_num, database, msg, message_types):
                 log.debug('Querying database to mark command as processed: %s',
                           message.complete)
                 update_processed(
-                    log,
+                    log_path,
                     database,
                     pending_cmd_seg[0],
                     str(datetime.datetime.now())[:19])
@@ -195,15 +208,18 @@ def process_return_command_msg(log, ref_num, database, msg, message_types):
 
 # Process update command message **********************************************
 @asyncio.coroutine
-def process_update_command_msg(log, ref_num, database, msg, message_types):
+def process_update_command_msg(log_path, ref_num, database, msg, message_types):
     """ When a UC message is received, perform an update query on the database
         to mark the original command as processed
     """
+    # Configure logging for this function
+    log = setup_function_logger(log_path, 'Function_process_update_command_msg')
+
     # Initialize result list
     out_msg_list = []
 
     # Map message header & payload to usable tags
-    message = UpdateCommandMessage(log=log)
+    message = UpdateCommandMessage(log_path)
     message.complete = msg
 
     # Update timestamp
@@ -213,7 +229,7 @@ def process_update_command_msg(log, ref_num, database, msg, message_types):
     log.debug('Querying database to mark command as processed: %s',
               message.complete)
     update_executed(
-        log,
+        log_path,
         database,
         message.dev_id,
         message.dev_processed)
@@ -221,7 +237,7 @@ def process_update_command_msg(log, ref_num, database, msg, message_types):
     # Send response indicating query was executed
     log.debug('Generating UC ACK message')
     out_msg = UpdateCommandMessageACK(
-        log=log,
+        log_path,
         ref=ref_num.new(),
         dest_addr=message.source_addr,
         dest_port=message.source_port,
