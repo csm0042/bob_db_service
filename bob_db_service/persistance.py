@@ -80,7 +80,7 @@ def query_command(log, database):
                     "WHERE processed Is NULL " \
                     "AND (device, timestamp) " \
                     "IN (SELECT device, Max(timestamp) " \
-                    "FROM device_cmd GROUP BY device) LIMIT 1"
+                    "FROM device_cmd GROUP BY device) LIMIT 5"
 
             log.debug('Ready to execute query: %s', query)
             cursor.execute(query)

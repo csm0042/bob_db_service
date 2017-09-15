@@ -45,6 +45,7 @@ class MainTask(object):
         self.message_types = []
         self.last_check_db = datetime.datetime.now()
         self.last_check_hb = datetime.datetime.now()
+        self.sleep_time = 0.2
         self.out_msg = str()
         self.out_msg_list = []
         self.next_msg = str()
@@ -90,9 +91,11 @@ class MainTask(object):
         while True:
             # Initialize result list
             self.out_msg_list = []
+            self.sleep_time = 0.2
 
             # INCOMING MESSAGE HANDLING
             if self.msg_in_queue.qsize() > 0:
+                self.sleep_time = 0.05
                 self.log.debug('Getting Incoming message from queue')
                 self.next_msg = self.msg_in_queue.get_nowait()
                 self.log.debug('Message pulled from queue: [%s]', self.next_msg)
@@ -212,4 +215,4 @@ class MainTask(object):
 
 
             # Yield to other tasks for a while
-            yield from asyncio.sleep(0.25)
+            yield from asyncio.sleep(self.sleep_time)
