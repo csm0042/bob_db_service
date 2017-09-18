@@ -8,9 +8,7 @@ application.  The following functions are supported here:
 
 # Import Required Libraries (Standard, Third Party, Local) ********************
 import copy
-import datetime
 import logging
-from bob_db_service.tools.log_support import setup_function_logger
 
 
 # Authorship Info *************************************************************
@@ -25,44 +23,44 @@ __status__ = "Development"
 
 
 # Insert Record into log table in database function ***************************
-def insert_record(log_path, database, name, status, last_seen):
+def insert_record(logger, database, name, status, last_seen):
     """ Inserts a new record into the device log table """
-    # Configure logging for this function
-    log = setup_function_logger(log_path, 'Function_insert_record')
-    log.debug('insert_record function has been called')
+    # Configure logger
+    logger = logger or logging.getLogger(__name__)
+    logger.debug('insert_record function has been called')
 
     # Attempt database record insert
     try:
         # Check first if valid database connection was made
         if database is not None:
-            log.debug('Connection to database is ok')
+            logger.debug('Connection to database is ok')
             cursor = database.cursor()
-            log.debug('Connection to cursor successful')
+            logger.debug('Connection to cursor successful')
             query = ("INSERT INTO device_log "
                      "(device, status, timestamp) "
                      "VALUES (%s, %s, %s)")
             data = (name, status, str(last_seen))
             full_query = query % data
-            log.debug('Ready to execute query: %s', full_query)
+            logger.debug('Ready to execute query: %s', full_query)
             cursor.execute(query, data)
-            log.debug('Query execution successful')
+            logger.debug('Query execution successful')
         else:
-            log.warning('No connection to database')
+            logger.warning('No connection to database')
     except Exception:
-        log.warning('Attempt to inesrt record into database failed')
+        logger.warning('Attempt to inesrt record into database failed')
     finally:
         database.commit()
-        log.debug('Changed committed to database')
+        logger.debug('Changed committed to database')
         cursor.close()
-        log.debug('Closed connection to database cursor')
+        logger.debug('Closed connection to database cursor')
 
 
 # Return pending commands from device_cmd table function **********************
-def query_command(log_path, database):
+def query_command(logger, database):
     """ Returns a list of un-processed commands from the device_cmd table """
-    # Configure logging for this function
-    log = setup_function_logger(log_path, 'Function_query_command')
-    log.debug('query_command function has been called')
+    # Configure logger
+    logger = logger or logging.getLogger(__name__)
+    logger.debug('query_command function has been called')
 
     # initialize result list
     result_list = []
@@ -71,10 +69,10 @@ def query_command(log_path, database):
     try:
         # Check first if valid database connection was made
         if database is not None:
-            log.debug('Connection to database is ok')
+            logger.debug('Connection to database is ok')
             # Grab cursor and prepare query
             cursor = database.cursor()
-            log.debug('Connection to cursor successful')
+            logger.debug('Connection to cursor successful')
 
             query = "SELECT id_device_cmd, device, cmd, timestamp, processed " \
                     "FROM device_cmd " \
@@ -83,99 +81,99 @@ def query_command(log_path, database):
                     "IN (SELECT device, Max(timestamp) " \
                     "FROM device_cmd GROUP BY device) LIMIT 5"
 
-            log.debug('Ready to execute query: %s', query)
+            logger.debug('Ready to execute query: %s', query)
             cursor.execute(query)
-            log.debug('Query execution successful')
+            logger.debug('Query execution successful')
             row = cursor.fetchone()
             while row is not None:
-                log.debug('Building result')
+                logger.debug('Building result')
                 result = '%s,%s,%s,%s,%s' % (row[0], row[1], row[2], row[3], row[4])
-                log.debug('Found pending cmd: [%s]', result)
+                logger.debug('Found pending cmd: [%s]', result)
                 result_list.append(copy.copy(result))
-                log.debug('Fetching next record in cursor')
+                logger.debug('Fetching next record in cursor')
                 row = cursor.fetchone()
-            log.debug('Select query complete')
+            logger.debug('Select query complete')
         else:
-            log.warning('No connection to database')
+            logger.warning('No connection to database')
     except Exception:
-        log.warning('Attempt to query database failed')
+        logger.warning('Attempt to query database failed')
     finally:
         database.commit()
-        log.debug('Changed committed to database')
+        logger.debug('Changed committed to database')
         cursor.close()
-        log.debug('Closed connection to database cursor')
+        logger.debug('Closed connection to database cursor')
 
     # Return results
     return result_list
 
 
 # Update processed status of commands in device_cmd table function ************
-def update_processed(log_path, database, id_cmd, processed_cmd):
+def update_processed(logger, database, id_cmd, processed_cmd):
     """ Updates processed field for an individual record in the device
     cmd table """
-    # Configure logging for this function
-    log = setup_function_logger(log_path, 'Function_update_processed')
-    log.debug('update_command function has been called')
+    # Configure logger
+    logger = logger or logging.getLogger(__name__)
+    logger.debug('update_command function has been called')
 
     # Attempt database record insert
     try:
         # Check first if valid database connection was made
         if database is not None:
-            log.debug('Connection to database is ok')
+            logger.debug('Connection to database is ok')
 
             # Grab cursor and prepare query
             cursor = database.cursor()
-            log.debug('Connection to cursor successful')
+            logger.debug('Connection to cursor successful')
             query = ("UPDATE device_cmd "
                      "SET processed = %s "
                      "WHERE id_device_cmd = %s")
             data = (processed_cmd[:19], id_cmd)
             full_query = query % data
-            log.debug('Ready to execute query: %s', full_query)
+            logger.debug('Ready to execute query: %s', full_query)
             cursor.execute(query, data)
-            log.debug('Query execution successful')
+            logger.debug('Query execution successful')
         else:
-            log.warning('No connection to database')
+            logger.warning('No connection to database')
     except Exception:
-        log.warning('Attempt to query database failed')
+        logger.warning('Attempt to query database failed')
     finally:
         database.commit()
-        log.debug('Changed committed to database')
+        logger.debug('Changed committed to database')
         cursor.close()
-        log.debug('Closed connection to database cursor')
+        logger.debug('Closed connection to database cursor')
 
 
 # Update processed status of commands in device_cmd table function ************
-def update_executed(log_path, database, id_cmd, processed_cmd):
+def update_executed(logger, database, id_cmd, processed_cmd):
     """ Updates processed field for an individual record in the device
     cmd table """
-    # Configure logging for this function
-    log = setup_function_logger(log_path, 'Function_update_executed')
-    log.debug('update_command function has been called')
+    # Configure logger
+    logger = logger or logging.getLogger(__name__)
+    logger.debug('update_command function has been called')
 
     # Attempt database record insert
     try:
         # Check first if valid database connection was made
         if database is not None:
-            log.debug('Connection to database is ok')
+            logger.debug('Connection to database is ok')
 
             # Grab cursor and prepare query
             cursor = database.cursor()
-            log.debug('Connection to cursor successful')
+            logger.debug('Connection to cursor successful')
             query = ("UPDATE device_cmd "
                      "SET executed = %s "
                      "WHERE id_device_cmd = %s")
             data = (processed_cmd[:19], id_cmd)
             full_query = query % data
-            log.debug('Ready to execute query: %s', full_query)
+            logger.debug('Ready to execute query: %s', full_query)
             cursor.execute(query, data)
-            log.debug('Query execution successful')
+            logger.debug('Query execution successful')
         else:
-            log.warning('No connection to database')
+            logger.warning('No connection to database')
     except Exception:
-        log.warning('Attempt to query database failed')
+        logger.warning('Attempt to query database failed')
     finally:
         database.commit()
-        log.debug('Changed committed to database')
+        logger.debug('Changed committed to database')
         cursor.close()
-        log.debug('Closed connection to database cursor')        
+        logger.debug('Closed connection to database cursor')

@@ -6,13 +6,11 @@
 # Import Required Libraries (Standard, Third Party, Local) ********************
 import configparser
 import logging
+import logging.handlers
 import os
 import sys
 import mysql.connector
 import mysql.connector.errorcode as errorcodes
-if __name__ == "__main__":
-    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from bob_db_service.tools.log_support import setup_log_handlers
 
 
 # Authorship Info *************************************************************
@@ -37,25 +35,41 @@ class ConfigureService(object):
         # Define connection to configuration file
         self.config_file = configparser.ConfigParser()
         self.credential_file = configparser.ConfigParser()
-        # Configure logger
-        self.log = self.get_logger()
 
 
     def get_logger(self):
         # Set up application logging
         self.config_file.read(self.filename)
-        self.log = setup_log_handlers(
-            __file__,
-            self.config_file['LOG FILES']['database_debug_log_file'],
-            self.config_file['LOG FILES']['database_info_log_file'])
+        self.log_path = self.config_file['LOG FILES']['log_file_path']
+        self.logger = logging.getLogger('master')
+        self.logger.setLevel(logging.DEBUG)
+        self.logger.handlers = []
+        os.makedirs(self.log_path, exist_ok=True)
+        # Console handler
+        self.handlers = []
+        self.ch = logging.StreamHandler(sys.stdout)
+        self.ch.setLevel(logging.INFO)
+        self.cf = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        self.ch.setFormatter(self.cf)
+        self.logger.addHandler(self.ch)
+        self.logger.info('Console logger handler created and applied')
+        # File handler
+        self.fh = logging.handlers.TimedRotatingFileHandler(
+            os.path.join(self.log_path, "Debug.log"),
+            when='d',
+            interval=1,
+            backupCount=4
+        )
+        self.fh.setLevel(logging.DEBUG)
+        self.ff = logging.Formatter(
+            '%(asctime)-25s %(levelname)-10s '
+            '%(funcName)-22s %(message)s'
+        )
+        self.fh.setFormatter(self.ff)
+        self.logger.addHandler(self.fh)
+        self.logger.info('File logger handler created and applied')
         # Return configured objects to main program
-        return self.log
-    
-    
-    def get_logger_path(self):
-        # Set up application logging storage paths
-        self.config_file.read(self.filename)
-        return self.config_file['LOG FILES']['log_file_path']    
+        return self.logger
 
 
     def get_servers(self):
@@ -82,9 +96,9 @@ class ConfigureService(object):
         # Read credential info from file
         try:
             self.credentials = self.config_file['CREDENTIALS']['file']
-            self.log.debug('Credentails file found')
+            self.logger.debug('Credentails file found')
         except:
-            self.log.error('No credentials file found')
+            self.logger.error('No credentials file found')
         # Return configured objects to main program
         return self.credentials
 
@@ -101,7 +115,7 @@ class ConfigureService(object):
                 database=self.config_file['DATABASE']['schema'],
                 user=self.credential_file['DATABASE']['username'],
                 password=self.credential_file['DATABASE']['password'])
-            self.log.debug("Successfully connected to database")
+            self.logger.debug("Successfully connected to database")
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
                 self.database = None
@@ -110,7 +124,7 @@ class ConfigureService(object):
             else:
                 self.database = None
             pass
-            self.log.debug("Could not connect to database")
+            self.logger.debug("Could not connect to database")
         # Return configured objects to main program
         return self.database
  
