@@ -200,6 +200,7 @@ class MainTask(object):
                     self.database,
                     ReturnCommandMessage(
                         logger=self.logger,
+                        ref = self.ref_num.new(),
                         dest_addr=self.service_addresses['database_addr'],
                         dest_port=self.service_addresses['database_port'],
                         source_addr=self.service_addresses['automation_addr'],
